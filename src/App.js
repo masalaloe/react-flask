@@ -1,14 +1,19 @@
 import React from 'react';
-import logo from './logo.svg';
 
-import Header from './Components/Header';
+import Main from './Components/Main';
+import { BrowserRouter, Switch, Route } from 'react-router-dom';
+import Home from './Components/Form/Home';
 import Login from './Components/Form/Login';
 
 function App() {
 	return (
-		<div className="App">
-			<Login />
-		</div>
+		<BrowserRouter>
+			<Switch>
+				<Route path="/" component={Home} exact/>
+				<Route path="/login" component={Login}/>
+			</Switch>
+		</BrowserRouter>
+		
 	);
 }
 
