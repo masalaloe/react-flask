@@ -1,4 +1,4 @@
-import React, { Component, useState } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import { Label, Input, Form, Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import Axios from 'axios';
 
@@ -6,13 +6,41 @@ import '../../Static/css/Login.css';
 import { conf } from '../../Config.js'
 
 function Login() {
-	const [dataLogin, setDataLogin] = useState({ username: '', password: '' })
-	const [response, setResponse] = useState('')
+	const [dataLogin, setDataLogin] = useState({ username: '', password: '', response: {} ,ready: true})
 
-	function tes() {
-		setResponse('tes')
-		console.log('cal')
-		console.log(response)
+	const handleInputOnChange = e => {
+		const { name, value } = e.target;
+		setDataLogin({ ...dataLogin, [name]: value })
+	}
+
+	const tes = (e) => {
+		setDataLogin({...dataLogin, response: {status: true}});
+	}
+
+	useEffect(() => {
+		setDataLogin({ ...dataLogin, ready: true})
+		console.table(dataLogin)
+		return () => {
+			setDataLogin({ ...dataLogin, ready: false})
+		}
+	},[dataLogin.ready])
+
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		Axios.post(`${conf.API_URL}api/login`, {
+			username: dataLogin.username,
+			password: dataLogin.password
+		}).then((json) => {
+			tes(json);
+			if (json.data.status === 'SUCCESS') {
+				alert('Succes')
+			} else {
+				alert('Failed')
+			}
+			console.log(dataLogin);
+		}).catch(ex => {
+			alert(ex);
+		});
 	}
 
 	function toggle() {
@@ -43,19 +71,7 @@ function Login() {
 
 	function loginUser() {
 		console.log(dataLogin)
-		Axios.post(`${conf.API_URL}api/login`, {
-			username: dataLogin.username,
-			password: dataLogin.password
-		}).then((json) => {
-			
-			if (json.data.status === 'SUCCESS') {
-				console.log('Succes')
-			} else {
-				console.log('Failed')
-			}
-		}).catch(ex => {
-			alert(ex);
-		});
+
 	}
 
 	return (
@@ -67,15 +83,15 @@ function Login() {
 					name="username"
 					id="username"
 					value={dataLogin.username}
-					onChange={e => setDataLogin({ ...dataLogin, username: e.target.value })}
+					onChange={handleInputOnChange}
 					placeholder="Username"
 				/>
 				<Input
-					type="text"
+					type="password"
 					name="password"
 					id="password"
 					value={dataLogin.password}
-					onChange={e => setDataLogin({ ...dataLogin, password: e.target.value })}
+					onChange={handleInputOnChange}
 					placeholder="Password"
 				/>
 				<div className="checkbox mb-3">
@@ -83,7 +99,7 @@ function Login() {
 						<Input type="checkbox" value="remember-me" />Remember me
 						</Label>
 				</div>
-				<Button className="btn btn-lg btn-primary btn-block" onClick={loginUser}>Sign in</Button>
+				<Button className="btn btn-lg btn-primary btn-block" disabled={!dataLogin.ready} onClick={handleSubmit}>Sign in</Button>
 				<Label>
 					dont have account ?{' '}
 					<span
